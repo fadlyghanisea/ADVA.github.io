@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #003c75; /* NEW COLOR */
+            overflow: hidden; 
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            /* Grid Pattern Preserved */
+            background-image: 
+                linear-gradient(rgba(0, 255, 234, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 234, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        #camera-view { position: relative; width: 100vw; height: 100vh; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #00ffea; box-shadow: 0 0 15px #00ffea; display: none; z-index: 10; }
+        .scanning .scan-line { display: block; animation: scanMove 1.5s infinite linear; }
+        @keyframes scanMove { 0% { top: 0%; } 100% { top: 100%; } }
+
+        .overlay { position: absolute; top: 0; width: 100%; padding: 20px; text-align: center; color: white; background: linear-gradient(to bottom, rgba(0,60,117,0.9), transparent); }
+        .overlay h3 { color: #00aec4; text-transform: uppercase; letter-spacing: 1px; }
+
+        .controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 20px; }
+        
+        .tactical-btn {
+            padding: 15px 40px; border-radius: 4px; border: 1px solid #00aec4;
+            background: rgba(0, 174, 196, 0.2); backdrop-filter: blur(5px);
+            color: #00aec4; font-weight: bold; font-size: 18px; cursor: pointer; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .tactical-btn.cancel { border-color: #555; color: #aaa; background: rgba(0,0,0,0.5); }
+
+        #result-modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 60, 117, 0.98); /* Matching the new theme */
+            z-index: 100; 
+            display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        
+        .status-icon { font-size: 80px; margin-bottom: 20px; text-shadow: 0 0 20px currentColor; }
+        .status-title { font-size: 28px; margin: 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .status-desc { color: #ccc; font-size: 16px; margin-top: 10px; margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+
+    <div id="camera-view">
+        <div class="overlay">
+            <h3>Scanning...</h3>
+            <p>Align damage within frame</p>
+        </div>
+        <video id="video" autoplay playsinline></video>
+        <div class="scan-line" id="scan-line"></div>
+        
+        <div class="controls">
+            <button class="tactical-btn cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+            <button class="tactical-btn" id="capture-btn" onclick="captureAndAnalyze()">Analyze</button>
+        </div>
+    </div>
+
+    <div id="result-modal">
+        <div id="modal-icon" class="status-icon"></div>
+        <h2 id="modal-title" class="status-title"></h2>
+        <p id="modal-desc" class="status-desc"></p>
+        <button class="tactical-btn" onclick="window.location.href='history.html'">View History</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+            } catch (err) { console.log("Camera simulation mode"); }
+        }
+        startCamera();
+
+        function captureAndAnalyze() {
+            const btn = document.getElementById('capture-btn');
+            btn.innerText = "Processing...";
+            video.pause(); 
+            document.getElementById('scan-line').style.display = 'block';
+            document.getElementById('camera-view').classList.add('scanning');
+            setTimeout(() => { showResult(); }, 2000);
+        }
+
+        function showResult() {
+            const modal = document.getElementById('result-modal');
+            const icon = document.getElementById('modal-icon');
+            const title = document.getElementById('modal-title');
+            const desc = document.getElementById('modal-desc');
+
+            const isExisting = Math.random() > 0.5;
+            const today = new Date();
+            const dateStr = today.toLocaleString('default', { month: 'short', day: 'numeric' });
+            
+            let scanRecord;
+
+            if (isExisting) {
+                icon.innerText = "✔"; icon.style.color = "#28a745";
+                title.innerText = "EXISTING FAULT"; title.style.color = "#28a745";
+                desc.innerText = "Dent on Hood is already on file.";
+                scanRecord = { date: dateStr, vehicle: "QX-1234", issue: "Dent on Hood", status: "Verified", color: "#28a745" };
+            } else {
+                icon.innerText = "⚠"; icon.style.color = "#dc3545";
+                title.innerText = "NEWLY DETECTED"; title.style.color = "#dc3545";
+                desc.innerText = "Damage not found in historical records.";
+                scanRecord = { date: dateStr, vehicle: "QX-1234", issue: "Unknown Scratch", status: "New", color: "#dc3545" };
+            }
+
+            let history = JSON.parse(localStorage.getItem('scanHistory')) || [];
+            history.unshift(scanRecord);
+            localStorage.setItem('scanHistory', JSON.stringify(history));
+
+            document.getElementById('scan-line').style.display = 'none';
+            modal.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

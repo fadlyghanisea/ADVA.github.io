@@ -2,352 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AutoVerify App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AutoVerify</title>
     <style>
-        /* --- GLOBAL STYLES --- */
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            height: 100vh;
-            overflow: hidden; /* Prevent scrolling on main body */
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            background-color: #003c75; 
+            color: #e0e0e0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 234, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 234, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            display: flex; justify-content: center; align-items: center; height: 100vh; 
         }
 
-        /* The App Container */
-        #app-container {
-            width: 100%;
-            height: 100%;
+        .login-card { 
+            background: rgba(0, 40, 80, 0.9); 
+            padding: 30px; border-radius: 8px; text-align: center; 
+            width: 85%; max-width: 350px; 
+            border: 1px solid #00aec4;
+            box-shadow: 0 0 20px rgba(0, 174, 196, 0.2);
             position: relative;
         }
-
-        /* PAGES (We hide/show these) */
-        .page {
-            display: none; /* Hidden by default */
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            overflow-y: auto; /* Allow scrolling inside pages */
-            background: #f4f6f9;
-        }
-
-        .page.active {
-            display: flex; /* Show active page */
-        }
-
-        /* --- GLOSSY BUTTON STYLE (Your Request) --- */
-        .glossy-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%; /* Full width in container */
-            max-width: 350px;
-            height: 60px;
-            border-radius: 50px;
-            border: 4px solid #d1d1d1;
-            background: linear-gradient(180deg, #4eaeff 0%, #004ecc 100%);
-            box-shadow: inset 0px 5px 10px rgba(255, 255, 255, 0.7), 0px 5px 10px rgba(0, 0, 0, 0.2);
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            text-shadow: 0px -1px 1px rgba(0,0,0,0.5);
-            transition: all 0.4s ease;
-            cursor: pointer;
-            text-decoration: none;
-            margin: 10px auto; /* Center it */
-            appearance: none; /* Remove default button styles */
-        }
-
-        .glossy-btn:hover {
-            background: linear-gradient(180deg, #ff6b6b 0%, #cc0000 100%);
-            border-color: #d1d1d1;
-        }
-
-        /* --- LOGIN PAGE --- */
-        .login-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-        .logo-circle {
-            width: 100px; height: 100px; background: #004ecc;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,78,204,0.3);
-            font-size: 50px; color: white;
-        }
-        .login-input {
-            width: 250px; padding: 15px; margin-bottom: 15px;
-            border: 1px solid #ddd; border-radius: 50px;
-            text-align: center; font-size: 16px; outline: none;
-        }
-
-        /* --- DASHBOARD PAGE --- */
-        .header {
-            background: #004ecc; color: white; padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .dashboard-grid {
-            padding: 20px;
-            display: grid;
-            gap: 20px;
-        }
-        .card {
-            background: white; border-radius: 15px; padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center;
-        }
-
-        /* --- SCANNER PAGE --- */
-        #camera-view {
-            flex: 1; position: relative; background: #000; overflow: hidden;
-        }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .scan-line {
-            position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: #00ffea; box-shadow: 0 0 15px #00ffea;
-            display: none; z-index: 10;
-        }
-        .scanning .scan-line { display: block; animation: scanMove 1.5s infinite linear; }
-        @keyframes scanMove { 0% { top: 0%; } 100% { top: 100%; } }
         
-        .camera-controls {
-            position: absolute; bottom: 0; width: 100%; padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            display: flex; justify-content: center; box-sizing: border-box;
+        .login-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #00aec4; box-shadow: 0 0 10px #00aec4;
         }
 
-        /* --- HISTORY PAGE --- */
-        .table-container { padding: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #004ecc; color: white; }
+        .logo { width: 100px; height: auto; display: block; margin: 0 auto 15px; }
+        h2 { color: #fff; margin: 0 0 5px; text-transform: uppercase; letter-spacing: 1px; }
+        p { color: #00aec4; margin: 0 0 25px; font-size: 14px; }
 
-        /* --- NAVIGATION BAR (Bottom) --- */
-        .nav-bar {
-            height: 60px; background: white; border-top: 1px solid #ddd;
-            display: flex; justify-content: space-around; align-items: center;
+        input { 
+            width: 100%; padding: 15px; margin-bottom: 15px; 
+            background: rgba(0,0,0,0.3); border: 1px solid #1a4f7a; 
+            border-radius: 4px; color: white; text-align: center; 
+            box-sizing: border-box; font-size: 16px; 
         }
-        .nav-item {
-            text-align: center; color: #888; font-size: 12px; cursor: pointer;
-        }
-        .nav-item.active-nav { color: #004ecc; font-weight: bold; }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+        input:focus { outline: none; border-color: #00aec4; box-shadow: 0 0 10px rgba(0, 174, 196, 0.3); }
+        .error-msg { color: #ff4d4d; font-size: 14px; margin-bottom: 15px; display: none; }
 
-        /* --- POPUP MODAL --- */
-        #result-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.95); z-index: 100;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
+        .tactical-btn {
+            display: block; width: 100%; padding: 15px 0; border-radius: 4px; border: 1px solid #00aec4;
+            background: rgba(0, 174, 196, 0.15);
+            color: #00aec4; font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: all 0.3s ease;
         }
-
+        .tactical-btn:hover { background: #00aec4; color: #000; box-shadow: 0 0 15px rgba(0, 174, 196, 0.6); }
     </style>
 </head>
 <body>
 
-<div id="app-container">
+    <audio id="success-sound" src="Media/Sound/solo.mp3" preload="auto"></audio>
 
-    <div id="page-login" class="page active">
-        <div class="login-content">
-            <div class="logo-circle">🛡️</div>
-            <h2 style="color:#333; margin:0;">AutoVerify</h2>
-            <p style="color:#666;">Pre-Deployment Checks</p>
-            <br>
-            <input type="text" class="login-input" placeholder="Officer ID" value="OFFICER-88">
-            <input type="password" class="login-input" placeholder="Password" value="password">
-            <button class="glossy-btn" onclick="goToPage('page-dashboard')">LOGIN</button>
-        </div>
+    <div class="login-card">
+        <img src="Media/Image/Index Page/Singapore_Police_Force_crest.png" alt="SPF Crest" class="logo">
+        <h2>AutoVerify</h2>
+        <p>Streamlining Pre-Deployment</p>
+        <div id="error-message" class="error-msg">❌ ACCESS DENIED</div>
+        <input type="text" id="username" placeholder="Username (OFFICER)">
+        <input type="password" id="password" placeholder="Password (1234)">
+        
+        <button class="tactical-btn" onclick="validateLogin()">LOGIN</button>
     </div>
 
-    <div id="page-dashboard" class="page">
-        <div class="header">
-            <h2 style="margin:0;">Dashboard</h2>
-            <p style="margin:0; opacity:0.8;">Welcome, Officer.</p>
-        </div>
-        
-        <div class="dashboard-grid">
-            <div class="card">
-                <h3>Start Inspection</h3>
-                <p style="color:#666;">Automated verification of vehicle damage.</p>
-                <button class="glossy-btn" onclick="startCamera()">📷 Scan Vehicle</button>
-            </div>
+    <script>
+        function validateLogin() {
+            var user = document.getElementById("username").value;
+            var pass = document.getElementById("password").value;
+            var errorDiv = document.getElementById("error-message");
+            var audio = document.getElementById("success-sound");
 
-            <div class="card" style="text-align: left;">
-                <h3>📊 Fleet Status</h3>
-                <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                    <span style="color:#28a745; font-weight:bold;">✔ 42 Ready</span>
-                    <span style="color:#dc3545; font-weight:bold;">⚠ 3 Repair</span>
-                </div>
-            </div>
-        </div>
-        
-        <div style="flex:1;"></div>
-        
-        <div class="nav-bar">
-            <div class="nav-item active-nav">
-                <span class="nav-icon">🏠</span>Home
-            </div>
-            <div class="nav-item" onclick="goToPage('page-history')">
-                <span class="nav-icon">📋</span>History
-            </div>
-            <div class="nav-item" onclick="goToPage('page-login')">
-                <span class="nav-icon">🚪</span>Logout
-            </div>
-        </div>
-    </div>
+            if (user === "OFFICER" && pass === "1234") {
+                
+                // 1. Force Play Sound
+                // Using a Promise to catch any browser "autoplay" blocks
+                var playPromise = audio.play();
 
-    <div id="page-scanner" class="page" style="background:black;">
-        <div id="camera-view">
-            <video id="video" autoplay playsinline></video>
-            <div class="scan-line" id="scan-line"></div>
-            
-            <div style="position:absolute; top:20px; width:100%; text-align:center; color:white; text-shadow:0 1px 3px black;">
-                <h3>Scanning...</h3>
-                <p>Align damage in frame</p>
-            </div>
-        </div>
-        
-        <div class="camera-controls">
-            <div style="width:100%; max-width:400px; display:flex; gap:10px;">
-                <button class="glossy-btn" style="background: #555; border-color:#777; width: 80px;" onclick="stopCamera()">Back</button>
-                <button class="glossy-btn" id="capture-btn" onclick="captureAndAnalyze()">Analyze</button>
-            </div>
-        </div>
-    </div>
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // Sound started!
+                    }).catch(error => {
+                        console.log("Audio play failed:", error);
+                    });
+                }
 
-    <div id="page-history" class="page">
-        <div class="header">
-            <h2 style="margin:0;">Vehicle History</h2>
-        </div>
-        <div class="table-container">
-            <input type="text" placeholder="Search Vehicle No..." style="width:100%; padding:15px; border-radius:10px; border:1px solid #ccc; margin-bottom:15px; box-sizing:border-box;">
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Vehicle</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Oct 24</td>
-                        <td><b>QX-1234</b><br><small>Dent on Hood</small></td>
-                        <td style="color:#28a745;">✔ Existing</td>
-                    </tr>
-                    <tr>
-                        <td>Oct 22</td>
-                        <td><b>QX-9988</b><br><small>Scratch Rear</small></td>
-                        <td style="color:#28a745;">✔ Existing</td>
-                    </tr>
-                    <tr>
-                        <td>Oct 20</td>
-                        <td><b>QX-5566</b><br><small>Cracked Lamp</small></td>
-                        <td style="color:#dc3545;">⚠ New</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div style="flex:1;"></div>
-        <div class="nav-bar">
-            <div class="nav-item" onclick="goToPage('page-dashboard')">
-                <span class="nav-icon">🏠</span>Home
-            </div>
-            <div class="nav-item active-nav">
-                <span class="nav-icon">📋</span>History
-            </div>
-            <div class="nav-item" onclick="goToPage('page-login')">
-                <span class="nav-icon">🚪</span>Logout
-            </div>
-        </div>
-    </div>
+                // 2. Wait 500ms (0.5 seconds) so you can hear it
+                setTimeout(function() {
+                    window.location.href = "dashboard.html"; 
+                }, 500);
 
-</div>
-
-<div id="result-modal">
-    <div style="font-size:60px; color:#28a745; margin-bottom:10px;">✔</div>
-    <h2 style="color:#333;">EXISTING FAULT</h2>
-    <p style="color:#666;">Dent on Hood is already on file.</p>
-    <button class="glossy-btn" style="width:200px;" onclick="closeModal()">OK</button>
-</div>
-
-<script>
-    // --- NAVIGATION LOGIC ---
-    function goToPage(pageId) {
-        // Hide all pages
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        // Show target page
-        document.getElementById(pageId).classList.add('active');
-        
-        // If leaving scanner, ensure camera stops
-        if(pageId !== 'page-scanner') {
-            stopCameraStream();
+            } else {
+                // Fail - No sound, just error
+                errorDiv.style.display = "block";
+                
+                document.querySelector('.login-card').animate([
+                    { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
+                ], { duration: 300 });
+            }
         }
-    }
-
-    // --- CAMERA LOGIC ---
-    const video = document.getElementById('video');
-    const scanLine = document.getElementById('scan-line');
-    const modal = document.getElementById('result-modal');
-    let stream = null;
-
-    async function startCamera() {
-        goToPage('page-scanner');
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            });
-            video.srcObject = stream;
-        } catch (err) {
-            alert("Camera access denied or not available. Ensure you are using HTTPS.");
-            goToPage('page-dashboard');
-        }
-    }
-
-    function stopCamera() {
-        stopCameraStream();
-        goToPage('page-dashboard');
-    }
-
-    function stopCameraStream() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-        }
-    }
-
-    function captureAndAnalyze() {
-        const btn = document.getElementById('capture-btn');
-        btn.innerText = "Processing...";
-        
-        // 1. Freeze Video
-        video.pause();
-        
-        // 2. Start Laser Animation
-        scanLine.style.display = 'block';
-        document.getElementById('camera-view').classList.add('scanning');
-
-        // 3. Simulate API Delay (2 seconds)
-        setTimeout(() => {
-            // Reset UI
-            scanLine.style.display = 'none';
-            document.getElementById('camera-view').classList.remove('scanning');
-            btn.innerText = "Analyze";
-            video.play(); // Resume video behind modal
-            
-            // Show Result
-            modal.style.display = 'flex';
-        }, 2000);
-    }
-
-    function closeModal() {
-        modal.style.display = 'none';
-        stopCamera(); // Go back to dashboard after checking
-    }
-</script>
+    </script>
 
 </body>
 </html>

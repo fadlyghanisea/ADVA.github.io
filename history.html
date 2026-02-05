@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <style>
+        body { 
+            margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            background-color: #003c75; color: #e0e0e0;
+            background-image: linear-gradient(rgba(0, 255, 234, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 234, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px; padding-bottom: 80px;
+        }
+        .header { background: rgba(0, 40, 80, 0.9); padding: 20px; border-bottom: 2px solid #00aec4; backdrop-filter: blur(5px); }
+        .header h2 { margin: 0; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .container { padding: 20px; }
+        input { width: 100%; padding: 15px; border-radius: 4px; border: 1px solid #1a4f7a; background: rgba(0, 40, 80, 0.9); color: white; margin-bottom: 15px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #00aec4; }
+        table { width: 100%; border-collapse: collapse; background: rgba(0, 40, 80, 0.85); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #1a4f7a; }
+        th { background: rgba(0, 40, 80, 0.8); color: #00aec4; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        td { color: #e0e0e0; font-size: 14px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #003c75; border-top: 1px solid #00509e; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-item { text-align: center; color: #aaa; font-size: 10px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .nav-item.active { color: #00aec4; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <audio id="entry-sound" autoplay>
+        <source src="Media/Sound/solo.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="header">
+        <h2 style="margin:0;">Vehicle History</h2>
+    </div>
+
+    <div class="container">
+        <input type="text" placeholder="Search Vehicle No...">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="history-list">
+                <tr>
+                    <td>Oct 24</td>
+                    <td><b>QX-1234</b><br><small style="color:#888;">Dent on Hood</small></td>
+                    <td style="color:#28a745; font-weight:bold;">✔ Verified</td>
+                </tr>
+                <tr>
+                    <td>Oct 22</td>
+                    <td><b>QX-9988</b><br><small style="color:#888;">Scratch Rear</small></td>
+                    <td style="color:#28a745; font-weight:bold;">✔ Verified</td>
+                </tr>
+                <tr>
+                    <td>Oct 20</td>
+                    <td><b>QX-5566</b><br><small style="color:#888;">Cracked Lamp</small></td>
+                    <td style="color:#dc3545; font-weight:bold;">⚠ New</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="nav-bar">
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+        <a href="history.html" class="nav-item active"><span class="nav-icon">📋</span>History</a>
+        <a href="index.html" class="nav-item"><span class="nav-icon">🚪</span>Logout</a>
+    </div>
+
+    <script>
+        const sound = document.getElementById('entry-sound');
+
+        // 1. Force Play on Load
+        window.addEventListener('load', () => {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Browser blocked autoplay"));
+        });
+
+        // 2. Play on any click
+        document.querySelectorAll('a, button, .nav-item').forEach(el => {
+            el.addEventListener('click', () => {
+                sound.currentTime = 0;
+                sound.play();
+            });
+        });
+
+        // --- HISTORY LOGIC ---
+        const historyList = document.getElementById('history-list');
+        const savedData = JSON.parse(localStorage.getItem('scanHistory')) || [];
+
+        savedData.forEach(record => {
+            const row = document.createElement('tr');
+            row.style.background = "rgba(0, 174, 196, 0.1)"; 
+            row.innerHTML = `
+                <td>${record.date}</td>
+                <td><b>${record.vehicle}</b><br><small style="color:#aab8c2;">${record.issue}</small></td>
+                <td style="color:${record.color}; font-weight:bold;">${record.status === 'Verified' ? '✔' : '⚠'} ${record.status}</td>
+            `;
+            historyList.insertBefore(row, historyList.firstChild);
+        });
+    </script>
+
+</body>
+</html>
