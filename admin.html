@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - AutoVerify</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif; 
+            background-color: #003c75; 
+            color: #e0e0e0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 234, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 234, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            display: flex; justify-content: center; align-items: center; height: 100vh; 
+        }
+
+        .admin-card { 
+            background: rgba(0, 40, 80, 0.9); 
+            padding: 30px; border-radius: 8px; 
+            width: 85%; max-width: 400px; 
+            border: 1px solid #00aec4;
+            box-shadow: 0 0 20px rgba(0, 174, 196, 0.2);
+            position: relative;
+            text-align: center;
+        }
+        
+        .admin-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #00aec4; box-shadow: 0 0 10px #00aec4;
+        }
+
+        h2 { color: #fff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px;}
+
+        input, select { 
+            width: 100%; padding: 15px; margin-bottom: 15px; 
+            background: rgba(0,0,0,0.3); border: 1px solid #1a4f7a; 
+            border-radius: 4px; color: white; 
+            box-sizing: border-box; font-size: 16px; 
+        }
+        input:focus, select:focus { outline: none; border-color: #00aec4; box-shadow: 0 0 10px rgba(0, 174, 196, 0.3); }
+
+        .tactical-btn {
+            display: block; width: 100%; padding: 15px 0; border-radius: 4px; border: 1px solid #00aec4;
+            background: rgba(0, 174, 196, 0.15);
+            color: #00aec4; font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .tactical-btn:hover { background: #00aec4; color: #000; box-shadow: 0 0 15px rgba(0, 174, 196, 0.6); }
+        
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #00aec4;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="admin-card">
+        <h2>Create New Officer</h2>
+        <input type="email" id="email" placeholder="Officer Email" required>
+        <input type="password" id="password" placeholder="Temporary Password" required>
+        <input type="text" id="fullName" placeholder="Full Name" required>
+        <input type="text" id="officerId" placeholder="Officer ID (e.g., OFFICER-88)" required>
+        <select id="role">
+            <option value="officer">Officer</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button class="tactical-btn" onclick="createOfficer()">Create Account</button>
+        <div id="message" class="message"></div>
+        <a href="index.html" class="back-link">Back to Login</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        const auth = firebase.auth();
+        const functions = firebase.functions();
+
+        function createOfficer() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+            const officerId = document.getElementById('officerId').value;
+            const role = document.getElementById('role').value;
+            const messageDiv = document.getElementById('message');
+
+            const createOfficerAccount = functions.httpsCallable('createOfficerAccount');
+            createOfficerAccount({
+                email: email,
+                password: password,
+                fullName: fullName,
+                officerId: officerId,
+                role: role
+            }).then(result => {
+                messageDiv.style.color = '#00aec4';
+                messageDiv.textContent = result.data.message;
+            }).catch(error => {
+                messageDiv.style.color = '#ff4d4d';
+                messageDiv.textContent = 'Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

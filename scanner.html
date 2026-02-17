@@ -7,10 +7,9 @@
     <style>
         body { 
             margin: 0; 
-            background-color: #003c75; /* NEW COLOR */
+            background-color: #003c75;
             overflow: hidden; 
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            /* Grid Pattern Preserved */
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
             background-image: 
                 linear-gradient(rgba(0, 255, 234, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 255, 234, 0.1) 1px, transparent 1px);
@@ -39,7 +38,7 @@
 
         #result-modal { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 60, 117, 0.98); /* Matching the new theme */
+            background: rgba(0, 60, 117, 0.98);
             z-index: 100; 
             display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
@@ -61,7 +60,7 @@
         
         <div class="controls">
             <button class="tactical-btn cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
-            <button class="tactical-btn" id="capture-btn" onclick="captureAndAnalyze()">Analyze</button>
+            <button class="tactical-btn" id="capture-btn" onclick="captureAndLogDamage()">Analyze</button>
         </div>
     </div>
 
@@ -72,54 +71,112 @@
         <button class="tactical-btn" onclick="window.location.href='history.html'">View History</button>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="firebase-config.js"></script>
+
     <script>
         const video = document.getElementById('video');
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+        let userOfficerId = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        userOfficerId = doc.data().officer_id;
+                    } else {
+                        console.error("User data not found in Firestore!");
+                    }
+                });
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
         async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                 video.srcObject = stream;
-            } catch (err) { console.log("Camera simulation mode"); }
+            } catch (err) { 
+                console.log("Camera simulation mode or error:", err);
+            }
         }
         startCamera();
 
-        function captureAndAnalyze() {
-            const btn = document.getElementById('capture-btn');
-            btn.innerText = "Processing...";
-            video.pause(); 
-            document.getElementById('scan-line').style.display = 'block';
-            document.getElementById('camera-view').classList.add('scanning');
-            setTimeout(() => { showResult(); }, 2000);
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
         }
 
-        function showResult() {
+        async function captureAndLogDamage() {
+            const btn = document.getElementById('capture-btn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+            video.pause();
+            document.getElementById('camera-view').classList.add('scanning');
+
+            const vehiclePlate = getQueryParam('plate') || 'UNKNOWN_PLATE';
+            const timestamp = new Date();
+            const officerId = userOfficerId || 'UNKNOWN_OFFICER';
+            
+            // 1. Capture Image
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+
+            // 2. Upload to Storage
+            const imageName = `${vehiclePlate}_${timestamp.getTime()}.jpg`;
+            const storageRef = storage.ref(`vehicle_scans/${imageName}`);
+            
+            try {
+                const uploadTask = await storageRef.put(imageBlob);
+                const photoURL = await uploadTask.ref.getDownloadURL();
+
+                // 3. Create Firestore Log
+                await db.collection('damage_logs').add({
+                    vehicle_plate: vehiclePlate,
+                    officer_id: officerId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    damage_type: "Dent on Hood", // Placeholder
+                    status: "Newly Detected", // Placeholder
+                    photo_url: photoURL
+                });
+
+                showResult(true, "Log created successfully.");
+
+            } catch (error) {
+                console.error("Error uploading file or writing to Firestore:", error);
+                showResult(false, "Failed to log damage: " + error.message);
+            }
+        }
+
+        function showResult(isSuccess, message) {
             const modal = document.getElementById('result-modal');
             const icon = document.getElementById('modal-icon');
             const title = document.getElementById('modal-title');
             const desc = document.getElementById('modal-desc');
 
-            const isExisting = Math.random() > 0.5;
-            const today = new Date();
-            const dateStr = today.toLocaleString('default', { month: 'short', day: 'numeric' });
-            
-            let scanRecord;
-
-            if (isExisting) {
+            if (isSuccess) {
                 icon.innerText = "✔"; icon.style.color = "#28a745";
-                title.innerText = "EXISTING FAULT"; title.style.color = "#28a745";
-                desc.innerText = "Dent on Hood is already on file.";
-                scanRecord = { date: dateStr, vehicle: "QX-1234", issue: "Dent on Hood", status: "Verified", color: "#28a745" };
+                title.innerText = "SUCCESS"; title.style.color = "#28a745";
             } else {
-                icon.innerText = "⚠"; icon.style.color = "#dc3545";
-                title.innerText = "NEWLY DETECTED"; title.style.color = "#dc3545";
-                desc.innerText = "Damage not found in historical records.";
-                scanRecord = { date: dateStr, vehicle: "QX-1234", issue: "Unknown Scratch", status: "New", color: "#dc3545" };
+                icon.innerText = "✖"; icon.style.color = "#dc3545";
+                title.innerText = "ERROR"; title.style.color = "#dc3545";
             }
-
-            let history = JSON.parse(localStorage.getItem('scanHistory')) || [];
-            history.unshift(scanRecord);
-            localStorage.setItem('scanHistory', JSON.stringify(history));
-
-            document.getElementById('scan-line').style.display = 'none';
+            desc.innerText = message;
+            
+            document.getElementById('camera-view').classList.remove('scanning');
             modal.style.display = 'flex';
         }
     </script>
